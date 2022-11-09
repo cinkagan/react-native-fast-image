@@ -17,6 +17,15 @@ Performant React Native image component.
 
 </div>
 
+#
+<h3 align="center"><b>Main repo of this project https://github.com/DylanVann/react-native-fast-image</b></h3>
+
+#
+<h3><b>Updates</b></h3>
+<p>Web support added</p>
+
+#
+
 <p align="center" >
   <kbd>
     <img

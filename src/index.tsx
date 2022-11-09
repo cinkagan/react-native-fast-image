@@ -3,7 +3,6 @@ import {
     View,
     Image,
     NativeModules,
-    requireNativeComponent,
     StyleSheet,
     FlexStyle,
     LayoutChangeEvent,
@@ -170,6 +169,24 @@ function FastImageBase({
     forwardedRef,
     ...props
 }: FastImageProps & { forwardedRef: React.Ref<any> }) {
+    if (fallback || Platform.OS === 'web') {
+        return (
+            <View style={[styles.imageContainer, style]} ref={forwardedRef}>
+                <Image
+                    {...props}
+                    style={StyleSheet.absoluteFill}
+                    source={source as any}
+                    onLoadStart={onLoadStart}
+                    onProgress={onProgress}
+                    onLoad={onLoad as any}
+                    onError={onError}
+                    onLoadEnd={onLoadEnd}
+                />
+                {children}
+            </View>
+        )
+    }
+
     if (fallback) {
         const cleanedSource = { ...(source as any) }
         delete cleanedSource.cache
@@ -245,8 +262,11 @@ FastImage.cacheControl = cacheControl
 
 FastImage.priority = priority
 
-FastImage.preload = (sources: Source[]) =>
-    NativeModules.FastImageView.preload(sources)
+FastImage.preload = (sources: Source[]) => {
+    if (Platform.OS !== 'web') {
+        NativeModules.FastImageView.preload(sources)
+    }
+}
 
 FastImage.clearMemoryCache = () =>
     NativeModules.FastImageView.clearMemoryCache()
@@ -259,11 +279,14 @@ const styles = StyleSheet.create({
     },
 })
 
-// Types of requireNativeComponent are not correct.
-const FastImageView = (requireNativeComponent as any)(
-    'FastImageView',
-    FastImage,
-    {
+let FastImageView: any
+
+if (Platform.OS === 'web') {
+    FastImageView = Image
+} else {
+    //@ts-ignore
+    const { requireNativeComponent } = require('react-native')
+    FastImageView = requireNativeComponent('FastImageView', FastImage, {
         nativeOnly: {
             onFastImageLoadStart: true,
             onFastImageProgress: true,
@@ -271,7 +294,7 @@ const FastImageView = (requireNativeComponent as any)(
             onFastImageError: true,
             onFastImageLoadEnd: true,
         },
-    },
-)
+    })
+}
 
 export default FastImage
