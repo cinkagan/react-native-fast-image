@@ -181,6 +181,7 @@ function FastImageBase({
                     onLoad={onLoad as any}
                     onError={onError}
                     onLoadEnd={onLoadEnd}
+                    resizeMode={resizeMode}
                 />
                 {children}
             </View>
